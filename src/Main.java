@@ -20,6 +20,21 @@ public static void main(String[] args) {
     IO.println("What is the FinalExam percentage?(EX: 30%)");
     int finalExamPercent = sc.nextInt();
     IO.println("What is you taget? (EX: 85%)");
+    int tagetPercent = sc.nextInt();
+
+    //创建一个文件来保存成绩
+    File file = new File("GPA.txt");
+    try {
+        if (file.createNewFile()) {
+            System.out.println("The file was created successfully：" + file.getAbsolutePath());
+        } else {
+            System.out.println("File already exists.");
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+
+
 
 
 
