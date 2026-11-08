@@ -3,23 +3,24 @@ import java.io.PrintWriter;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import static java.lang.IO.println;
 
 public static void main(String[] args) {
     Scanner in;
     Scanner sc = new Scanner(System.in);
 
     //ASK some basic question to start
-    IO.println("which subject that you take and want to calculate?");
+    println("which subject that you take and want to calculate?");
     String subject = sc.nextLine();
-    IO.println("What is the Quiz percentage?(EX: 2%)");
+    println("What is the Quiz percentage?(EX: 2%, Type 2)");
     int quizPercent = sc.nextInt();
-    IO.println("What is the Assignment/Project percentage?(EX: 3%)");
+    println("What is the Assignment/Project percentage?(EX: 3%,Type 3)");
     int assignPercent = sc.nextInt();
-    IO.println("What is the Test percentage?(EX: 4%)");
+    println("What is the Test percentage?(EX: 4%,Type 4)");
     int testPercent = sc.nextInt();
-    IO.println("What is the FinalExam percentage?(EX: 30%)");
+    println("What is the FinalExam percentage?(EX: 30%,Type 30)");
     int finalExamPercent = sc.nextInt();
-    IO.println("What is you taget? (EX: 85%)");
+    println("What is you taget? (EX: 85%,type 85)");
     int tagetPercent = sc.nextInt();
 
     //创建一个文件来保存成绩
