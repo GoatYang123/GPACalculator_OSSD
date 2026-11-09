@@ -5,33 +5,15 @@ import static java.lang.IO.println;
 void main(String[] args) {
     Scanner sc = new Scanner(System.in);
 
-    //ASK some basic question to start
-    println("which subject that you take and want to calculate?");
-    String subject = sc.nextLine();
-
-    println("What is the Quiz percentage?(EX: 2%, Type 2)");
-    int quizPercent = sc.nextInt();
-    println("how many quiz you have in total?");
-    int quiznum = sc.nextInt();
-
-    println("What is the Assignment/Project percentage?(EX: 3%,Type 3)");
-    int assignmentPercent = sc.nextInt();
-    println("how many assignments you have in total?");
-    int assignmentnum = sc.nextInt();
-
-    println("What is the Test percentage?(EX: 4%,Type 4)");
-    int testPercent = sc.nextInt();
-    println("how many tests you have in total?");
-    int testnum = sc.nextInt();
-
-    println("What is the FinalExam percentage?(EX: 30%,Type 30)");
-    int finalExamPercent = sc.nextInt();
-
-    println("If you have attendant type here(1-100)(this has a stable value which is 10%):");
-    int attendancePercent = sc.nextInt();
-
-    println("What is you taget? (EX: 85%,type 85)");
-    int tagetPercent = sc.nextInt();
+    //ASK some basic question to start (in DataModify.BasicInforInput)
+    DataModify.BasicInfo info = DataModify.BasicInforInput();
+    String subject = info.subject();
+    int quizPercent = info.quizPercent();
+    int assignmentPercent = info.assignmentPercent();
+    int testPercent = info.testPercent();
+    int finalExamPercent = info.finalExamPercent();
+    int finalExamScore = info.finalExamScore();
+    int tagetPercent = info.tagetPercent();
 
     //创建一个文件来保存成绩
     File quizgrades = new File("quizgrades.txt");
@@ -63,14 +45,15 @@ void main(String[] args) {
         println("2. I modify the file by myself");
         switch (sc.nextInt()) {
             case 1:DataModify.InputData(quizPercentarray,testPercentarray,assignmentPercentarray);
-            case 2:
+            case 2:break;
         }
 
         //展示菜单
     while (true) {
-        double CurrentGrade = DataModify.CurrentGrade(quizPercentarray,testPercentarray,assignmentPercentarray,
-                quizPercent,testPercent,assignmentPercent,quiznum,testnum,assignmentnum);
-        String Level = DataModify.level(CurrentGrade);
+        double CurrentGrade = DataProcessing.CurrentGrade(quizPercentarray,testPercentarray,assignmentPercentarray,
+                quizPercent,testPercent,assignmentPercent,
+                finalExamPercent,finalExamScore);
+        String Level = DataProcessing.level(CurrentGrade);
         println(subject + " grade");
         println("your taget:" + tagetPercent + "%");
         println("your current grade:" + CurrentGrade +"%" + " level " + Level);
@@ -81,7 +64,8 @@ void main(String[] args) {
         int option = sc.nextInt();
 
         switch (option) {
-            case 1: DataModify.ModifyData(quizPercentarray,testPercentarray,assignmentPercentarray,quiznum,testnum,assignmentnum);
+            //change grade from test,quiz,Assignment
+            case 1: DataModify.ModifyData(quizPercentarray,testPercentarray,assignmentPercentarray);
                 break;
         }
     }
