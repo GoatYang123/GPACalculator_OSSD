@@ -1,12 +1,8 @@
 import java.util.Scanner;
-import java.io.PrintWriter;
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import static java.lang.IO.println;
 
-public static void main(String[] args) {
-    Scanner in;
+void main(String[] args) {
     Scanner sc = new Scanner(System.in);
 
     //ASK some basic question to start
@@ -15,17 +11,17 @@ public static void main(String[] args) {
 
     println("What is the Quiz percentage?(EX: 2%, Type 2)");
     int quizPercent = sc.nextInt();
-    println("how many quiz you have?");
+    println("how many quiz you have in total?");
     int quiznum = sc.nextInt();
 
     println("What is the Assignment/Project percentage?(EX: 3%,Type 3)");
     int assignmentPercent = sc.nextInt();
-    println("how many assignments you have?");
+    println("how many assignments you have in total?");
     int assignmentnum = sc.nextInt();
 
     println("What is the Test percentage?(EX: 4%,Type 4)");
     int testPercent = sc.nextInt();
-    println("how many tests you have?");
+    println("how many tests you have in total?");
     int testnum = sc.nextInt();
 
     println("What is the FinalExam percentage?(EX: 30%,Type 30)");
@@ -48,9 +44,9 @@ public static void main(String[] args) {
     try {
         if (quizgrades.createNewFile() || testgrades.createNewFile() || finalexamgrades.createNewFile() ||
                 tagetgrades.createNewFile() || AssignmentGrades.createNewFile()) {
-            System.out.println("The File was created successfully");
+            System.out.println("Files created at: \n" + quizgrades.getAbsolutePath());
         } else {
-            System.out.println("File already exists.");
+            System.out.println("File already exists.\n" + quizgrades.getAbsolutePath());
         }
     } catch (IOException e) {
         e.printStackTrace();
@@ -71,6 +67,23 @@ public static void main(String[] args) {
         }
 
         //展示菜单
-    println("");
+    while (true) {
+        double CurrentGrade = DataModify.CurrentGrade(quizPercentarray,testPercentarray,assignmentPercentarray,
+                quizPercent,testPercent,assignmentPercent,quiznum,testnum,assignmentnum);
+        String Level = DataModify.level(CurrentGrade);
+        println(subject + " grade");
+        println("your taget:" + tagetPercent + "%");
+        println("your current grade:" + CurrentGrade +"%" + " level " + Level);
+        println("1.Modify your grade");
+        println("2.To achieve the target score, it is necessary to……");
+        println("3.show all you grade");
+
+        int option = sc.nextInt();
+
+        switch (option) {
+            case 1: DataModify.ModifyData(quizPercentarray,testPercentarray,assignmentPercentarray,quiznum,testnum,assignmentnum);
+                break;
+        }
+    }
 
 }
