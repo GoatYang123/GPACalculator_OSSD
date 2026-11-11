@@ -2,10 +2,10 @@ import java.util.Scanner;
 import java.io.IOException;
 import static java.lang.IO.println;
 
-void main(String[] args) {
+void main() throws IOException {
     Scanner sc = new Scanner(System.in);
 
-    //ASK some basic question to start (in DataModify.BasicInforInput)
+    //ASK some basic question to start
     DataModify.BasicInfo info = DataModify.BasicInforInput();
     String subject = info.subject();
     int quizPercent = info.quizPercent();
@@ -23,16 +23,14 @@ void main(String[] args) {
     File tagetgrades = new File("tagetgrades.txt");
 
     //创建四个文件夹用于储存数据
-    try {
         if (quizgrades.createNewFile() || testgrades.createNewFile() || finalexamgrades.createNewFile() ||
                 tagetgrades.createNewFile() || AssignmentGrades.createNewFile()) {
-            System.out.println("Files created at: \n" + quizgrades.getAbsolutePath());
+            System.out.println("Files created at: \n" + quizgrades.getAbsolutePath() + "\n" + testgrades.createNewFile()
+                    + "\n" + AssignmentGrades.createNewFile() + "\n" + finalexamgrades.createNewFile());
         } else {
-            System.out.println("File already exists.\n" + quizgrades.getAbsolutePath());
+            System.out.println("File already exists.\n" + quizgrades.getAbsolutePath() + "\n" + testgrades.createNewFile()
+                    + "\n" + AssignmentGrades.createNewFile() + "\n" + finalexamgrades.createNewFile());
         }
-    } catch (IOException e) {
-        e.printStackTrace();
-    }
 
     //设置数组，最大值为1000
 	int[] quizPercentarray = new int[1000];
@@ -60,21 +58,34 @@ void main(String[] args) {
         println("your taget:" + tagetPercent + "%");
         println("your current grade:" + CurrentGrade +"%" + " level " + Level);
         println("1.Modify your grade");
-        println("2.To achieve the target score, it is necessary to……(if you have done your final exam, ignore it)");
-        println("3.show all you grade");
-        println("4.Reload grades from file");
+        println("2.show all the grade");
+        println("3.show all from highest to lowest ");
+        println("4.show all the grades from highest to lowest ");
+        println("5.delete data from your grade");
+        println("6.sreach grade from your grade");
+        println("7.Reload grades from file");
 
         int option = sc.nextInt();
 
         switch (option) {
             //change grade from test,quiz,Assignment
-            case 1: DataModify.ModifyData(quizPercentarray,testPercentarray,assignmentPercentarray);
+            case 1:DataModify.ModifyData(quizPercentarray,testPercentarray,assignmentPercentarray);
+                break;
+            //show the grade and sort
+            case 2:DataProcessing.ShowGrades(quizPercentarray,testPercentarray,assignmentPercentarray,finalExamScore);
                 break;
 
-            case 2:
-                break;
+            //show all the grade
+            case 3:
 
-            case 4: DataModify.LoadFromFile(quizPercentarray,testPercentarray,assignmentPercentarray);
+            case 4:
+
+            case 5:
+
+            case 6:
+
+            //reload the file （when user change data)
+            case 7:DataModify.LoadFromFile(quizPercentarray,testPercentarray,assignmentPercentarray);
                 break;
         }
     }
