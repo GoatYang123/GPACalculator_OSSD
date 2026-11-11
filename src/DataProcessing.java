@@ -5,11 +5,10 @@
 
 import static java.lang.IO.println;
 import java.util.Scanner;
-import java.io.PrintWriter;
-import java.io.FileWriter;
-import java.io.IOException;
+
 
 public class DataProcessing {
+	static Scanner sc = new Scanner(System.in);
 
 	//判断用户的成绩等级
 	public static String level(double CurrentGrade){
@@ -35,26 +34,26 @@ public class DataProcessing {
 		// 动态统计实际输入的成绩个数（成绩范围 1-100，未输入的位置是 0）
 		int quizCount = 0;
 		int quizSum = 0;
-		for (int i = 0; i < quizPercentarray.length; i++) {
-			if (quizPercentarray[i] != 0) {
+		for (int j : quizPercentarray) {
+			if (j != 0) {
 				quizCount++;
-				quizSum += quizPercentarray[i];
+				quizSum += j;
 			}
 		}
 		int testCount = 0;
 		int testSum = 0;
-		for (int i = 0; i < testPercentarray.length; i++) {
-			if (testPercentarray[i] != 0) {
+		for (int j : testPercentarray) {
+			if (j != 0) {
 				testCount++;
-				testSum += testPercentarray[i];
+				testSum += j;
 			}
 		}
 		int assignmentCount = 0;
 		int assignmentSum = 0;
-		for (int i = 0; i < assignmentPercentarray.length; i++) {
-			if (assignmentPercentarray[i] != 0) {
+		for (int j : assignmentPercentarray) {
+			if (j != 0) {
 				assignmentCount++;
-				assignmentSum += assignmentPercentarray[i];
+				assignmentSum += j;
 			}
 		}
 
@@ -84,6 +83,49 @@ public class DataProcessing {
 		}
 
 		return totalWeight == 0 ? 0 : weightedSum / totalWeight;
+	}
+
+	//向用户展示所有的成绩
+	public static void ShowGrades(int[] quizPercentarray, int[] testPercentarray, int[] assignmentPercentarray,int finalExamScore) {
+		println("Score menu");
+		println("your final exam mark is:" + finalExamScore);
+		println("1.show all the quiz Grades");
+		println("2.show all the test Grades");
+		println("3.show all the assignment Grades");
+
+		int option = sc.nextInt();
+
+		switch (option) {
+			case 1:
+				for (int i = 0; i < quizPercentarray.length; i++) {
+					if (quizPercentarray[i] <= 0) {
+						println("there is no grade for quiz");
+					}else{
+						println("quiz" + i+1 +":" + quizPercentarray[i]);
+					}
+				}//end for
+				break;
+			case 2:
+				for (int i = 0; i < testPercentarray.length; i++) {
+					if (testPercentarray[i] <= 0) {
+						println("there is no grade for test");
+					}else{
+						println("test" + i+1 +":" + testPercentarray[i]);
+					}
+				}
+				break;
+			case 3:
+				for (int i = 0; i < assignmentPercentarray.length; i++) {
+					if (assignmentPercentarray[i] <= 0) {
+						println("there is no grade for assignment");
+					}else{
+						println("assignment" + i+1 +":" + assignmentPercentarray[i]);
+					}
+				}
+				break;
+		}
+
+
 	}
 
 
