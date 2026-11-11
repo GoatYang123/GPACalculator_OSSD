@@ -44,8 +44,10 @@ void main(String[] args) {
         println("1. Add Grade");
         println("2. I modify the file by myself");
         switch (sc.nextInt()) {
-            case 1:DataModify.InputData(quizPercentarray,testPercentarray,assignmentPercentarray);
-            case 2:break;
+            case 1: DataModify.InputData(quizPercentarray,testPercentarray,assignmentPercentarray);
+                break;
+            case 2: DataModify.LoadFromFile(quizPercentarray,testPercentarray,assignmentPercentarray);
+                break;
         }
 
         //展示菜单
@@ -58,14 +60,21 @@ void main(String[] args) {
         println("your taget:" + tagetPercent + "%");
         println("your current grade:" + CurrentGrade +"%" + " level " + Level);
         println("1.Modify your grade");
-        println("2.To achieve the target score, it is necessary to……");
+        println("2.To achieve the target score, it is necessary to……(if you have done your final exam, ignore it)");
         println("3.show all you grade");
+        println("4.Reload grades from file");
 
         int option = sc.nextInt();
 
         switch (option) {
             //change grade from test,quiz,Assignment
             case 1: DataModify.ModifyData(quizPercentarray,testPercentarray,assignmentPercentarray);
+                break;
+
+            case 2:
+                break;
+
+            case 4: DataModify.LoadFromFile(quizPercentarray,testPercentarray,assignmentPercentarray);
                 break;
         }
     }

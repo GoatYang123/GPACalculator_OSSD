@@ -1,12 +1,14 @@
 /**
- * 本程序用于让用户添加和删改数据
- * 相关的功能均放在这个包里
+ * This program is used to allow users to add and delete data
+ * All related functions are included in this package
  */
 
 import static java.lang.IO.println;
 import java.util.Scanner;
 import java.io.PrintWriter;
 import java.io.FileWriter;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 
 public class DataModify {
@@ -20,17 +22,24 @@ public class DataModify {
 		println("which subject that you take and want to calculate?");
 		String subject = sc.nextLine();
 
-		println("What is the Quiz percentage?(EX: 2%, Type 2)");
+		println("What is the Quiz total percentage?(EX: 20%)");
 		int quizPercent = sc.nextInt();
 
-		println("What is the Assignment/Project percentage?(EX: 3%,Type 3)");
+		println("What is the Assignment/Project total percentage?(EX: 30%)");
 		int assignmentPercent = sc.nextInt();
 
-		println("What is the Test percentage?(EX: 4%,Type 4)");
+		println("What is the Test total percentage?(EX: 20%)");
 		int testPercent = sc.nextInt();
 
-		println("What is the FinalExam percentage?(EX: 30%,Type 30)");
+		println("What is the FinalExam percentage?(EX: 30%)");
 		int finalExamPercent = sc.nextInt();
+
+		// 检查总占比是否超过 100%
+		int totalPercent = quizPercent + assignmentPercent + testPercent + finalExamPercent;
+		if (totalPercent > 100) {
+			println("Warning: total is " + totalPercent + "%, The total exceeds 100%. Please review all percentage inputs");
+		}
+
 		println("Have you taken the Final Exam? Enter your score (1-100), or 0 if not yet:");
 		int finalExamScore = sc.nextInt();
 
@@ -167,6 +176,31 @@ public class DataModify {
 			}
 		} else {
 			println("No modification.");
+		}
+	}
+
+	//从文件读取成绩到数组（重新加载）
+	public static void LoadFromFile(int[] quizPercentarray, int[] testPercentarray, int[] assignmentPercentarray) {
+		loadArray("quizgrades.txt", quizPercentarray);
+		loadArray("testgrades.txt", testPercentarray);
+		loadArray("AssignmentGrades.txt", assignmentPercentarray);
+		println("Grades reloaded from files.");
+	}
+	private static void loadArray(String fileName, int[] array) {
+		try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+			String line;
+			int i = 0;
+			while ((line = reader.readLine()) != null && i < array.length) {
+				line = line.trim();
+				if (!line.isEmpty()) {
+					array[i] = Integer.parseInt(line);
+					i++;
+				}
+			}
+		} catch (IOException e) {
+			println("read " + fileName + " fail: " + e.getMessage());
+		} catch (NumberFormatException e) {
+			println("file " + fileName + " Contains unresolved rows");
 		}
 	}
 

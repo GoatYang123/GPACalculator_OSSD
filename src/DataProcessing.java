@@ -1,6 +1,6 @@
 /**
- * 本程序用于处理数据，如判断，计算，排序……
- * 相关的功能都在这个包内
+ * This program is used to process data, such as judgment, calculation, sorting
+ * All related functions are included in this package
  */
 
 import static java.lang.IO.println;
@@ -58,25 +58,23 @@ public class DataProcessing {
 			}
 		}
 
-		// 每类总权重 = 单项百分比 × 已输入个数
-		int quizWeight = quizPercent * quizCount;
-		int testWeight = testPercent * testCount;
-		int assignmentWeight = assignmentPercent * assignmentCount;
-
 		double weightedSum = 0;
 		int totalWeight = 0;
 
 		if (quizCount > 0) {
-			weightedSum += quizSum * quizPercent;
-			totalWeight += quizWeight;
+			double quizAvg = (double) quizSum / quizCount;
+			weightedSum += quizAvg * quizPercent;
+			totalWeight += quizPercent;
 		}
 		if (testCount > 0) {
-			weightedSum += testSum * testPercent;
-			totalWeight += testWeight;
+			double testAvg = (double) testSum / testCount;
+			weightedSum += testAvg * testPercent;
+			totalWeight += testPercent;
 		}
 		if (assignmentCount > 0) {
-			weightedSum += assignmentSum * assignmentPercent;
-			totalWeight += assignmentWeight;
+			double assignmentAvg = (double) assignmentSum / assignmentCount;
+			weightedSum += assignmentAvg * assignmentPercent;
+			totalWeight += assignmentPercent;
 		}
 
 		// 期末：只有输入了期末分数(>0)才计入
