@@ -29,8 +29,7 @@ public class DataProcessing {
 
 	//通过用户的输入推断出成绩百分比
 	public static double CurrentGrade(int[] quizPercentarray, int[] testPercentarray, int[] assignmentPercentarray,
-			int quizPercent, int testPercent, int assignmentPercent,
-			int finalExamPercent, int finalExamScore) {
+			int quizPercent, int testPercent, int assignmentPercent, int finalExamPercent, int finalExamScore) {
 		// 动态统计实际输入的成绩个数（成绩范围 1-100，未输入的位置是 0）
 		int quizCount = 0;
 		int quizSum = 0;
@@ -128,5 +127,44 @@ public class DataProcessing {
 
 	}
 
+	//向用户展示所有成绩从低到高（不影响原数组）
+	public static void SortGrades(int[] quizPercentarray, int[] testPercentarray, int[] assignmentPercentarray){
+		sortAndShow("quiz", quizPercentarray);
+		sortAndShow("test", testPercentarray);
+		sortAndShow("assignment", assignmentPercentarray);
+	}
 
+	private static void sortAndShow(String name, int[] array) {
+		int count = 0;
+		for (int value : array) {
+			if (value != 0) {
+				count++;
+			}
+		}
+		if (count == 0) {
+			println("there is no " + name + " grade");
+			return;
+		}
+		int[] grades = new int[count];
+		int idx = 0;
+		for (int value : array) {
+			if (value != 0) {
+				grades[idx] = value;
+				idx++;
+			}
+		}
+		for (int i = 0; i < grades.length - 1; i++) {
+			for (int j = 0; j < grades.length - 1 - i; j++) {
+				if (grades[j] > grades[j + 1]) {
+					int temp = grades[j];
+					grades[j] = grades[j + 1];
+					grades[j + 1] = temp;
+				}
+			}
+		}
+		println("your " + name + " grade sorted from lowest to highest:");
+		for (int grade : grades) {
+			println(grade);
+		}
+	}
 }

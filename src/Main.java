@@ -59,33 +59,33 @@ void main() throws IOException {
         println("your current grade:" + CurrentGrade +"%" + " level " + Level);
         println("1.Modify your grade");
         println("2.show all the grade");
-        println("3.show all from highest to lowest ");
-        println("4.show all the grades from highest to lowest ");
-        println("5.delete data from your grade");
-        println("6.sreach grade from your grade");
-        println("7.Reload grades from file");
+        println("3.show all the grades from Lowest to highest");
+        println("4.delete data from your grade");
+        println("5.sreach grade from your grade");
+        println("6.Reload grades from file");
 
         int option = sc.nextInt();
 
         switch (option) {
             //change grade from test,quiz,Assignment
             case 1:DataModify.ModifyData(quizPercentarray,testPercentarray,assignmentPercentarray);
-                break;
+            break;
+
             //show the grade and sort
             case 2:DataProcessing.ShowGrades(quizPercentarray,testPercentarray,assignmentPercentarray,finalExamScore);
-                break;
+            break;
 
             //show all the grade
-            case 3:
+            case 3:DataProcessing.SortGrades(quizPercentarray,testPercentarray,assignmentPercentarray);
+            break;
 
+            //
             case 4:
 
             case 5:
 
-            case 6:
-
-            //reload the file （when user change data)
-            case 7:DataModify.LoadFromFile(quizPercentarray,testPercentarray,assignmentPercentarray);
+            //reload the file
+            case 6: DataModify.LoadFromFile(quizPercentarray,testPercentarray,assignmentPercentarray);
                 break;
         }
     }
