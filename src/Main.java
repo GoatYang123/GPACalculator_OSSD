@@ -3,7 +3,7 @@ import java.io.IOException;
 import static java.lang.IO.println;
 
 void main() throws IOException {
-    Scanner sc = new Scanner(System.in);
+    Scanner sc = DataProcessing.sc;
 
     //ASK some basic question to start
     DataModify.BasicInfo info = DataModify.BasicInforInput();
@@ -15,29 +15,27 @@ void main() throws IOException {
     int finalExamScore = info.finalExamScore();
     int tagetPercent = info.tagetPercent();
 
-    //创建一个文件来保存成绩
+    //Create the files used to save the grades
     File quizgrades = new File("quizgrades.txt");
     File testgrades = new File("testgrades.txt");
     File AssignmentGrades = new File("AssignmentGrades.txt");
-    File finalexamgrades = new File("finalexamgrades.txt");
-    File tagetgrades = new File("tagetgrades.txt");
 
-    //创建四个文件夹用于储存数据
-        if (quizgrades.createNewFile() || testgrades.createNewFile() || finalexamgrades.createNewFile() ||
-                tagetgrades.createNewFile() || AssignmentGrades.createNewFile()) {
-            System.out.println("Files created at: \n" + quizgrades.getAbsolutePath() + "\n" + testgrades.createNewFile()
-                    + "\n" + AssignmentGrades.createNewFile() + "\n" + finalexamgrades.createNewFile());
-        } else {
-            System.out.println("File already exists.\n" + quizgrades.getAbsolutePath() + "\n" + testgrades.createNewFile()
-                    + "\n" + AssignmentGrades.createNewFile() + "\n" + finalexamgrades.createNewFile());
-        }
+    //Create the files used to store the data
+    try {
+        quizgrades.createNewFile();
+        testgrades.createNewFile();
+        AssignmentGrades.createNewFile();
+        System.out.println("Files location: \n" + quizgrades.getAbsolutePath());
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
 
-    //设置数组，最大值为1000
+    //Set up the arrays with a maximum size of 1000
 	int[] quizPercentarray = new int[1000];
     int[] testPercentarray = new int[1000];
     int[] assignmentPercentarray = new int[1000];
 
-    //读取文件内信息及引导用户在此处输入
+    //Read the files and guide the user to input data here
         println("you can check the GPA location and modify it or you can choose input data at here.");
         println("1. Add Grade");
         println("2. I modify the file by myself");
@@ -48,7 +46,7 @@ void main() throws IOException {
                 break;
         }
 
-        //展示菜单
+        //Show the menu
     while (true) {
         double CurrentGrade = DataProcessing.CurrentGrade(quizPercentarray,testPercentarray,assignmentPercentarray,
                 quizPercent,testPercent,assignmentPercent,
@@ -61,8 +59,9 @@ void main() throws IOException {
         println("2.show all the grade");
         println("3.show all the grades from Lowest to highest");
         println("4.delete data from your grade");
-        println("5.resech grade");
+        println("5.Search grade");
         println("6.Reload grades from file");
+        println("7.Exit");
 
         int option = sc.nextInt();
 
@@ -80,15 +79,19 @@ void main() throws IOException {
             break;
 
             //delete data
-            case 4:
+            case 4:DataModify.DataDelete(quizPercentarray,testPercentarray,assignmentPercentarray);
+            break;
 
-            //查找
-            case 5:
+            //Search
+            case 5:DataProcessing.DataSearch(quizPercentarray,testPercentarray,assignmentPercentarray);
+            break;
 
             //reload the file
             case 6: DataModify.LoadFromFile(quizPercentarray,testPercentarray,assignmentPercentarray);
                 break;
+
+            //exit
+            case 7: return;
         }
     }
-
 }

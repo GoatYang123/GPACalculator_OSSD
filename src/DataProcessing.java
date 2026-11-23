@@ -10,7 +10,7 @@ import java.util.Scanner;
 public class DataProcessing {
 	static Scanner sc = new Scanner(System.in);
 
-	//判断用户的成绩等级
+	//Determine the user's grade level
 	public static String level(double CurrentGrade){
 		String level;
 		if (CurrentGrade >= 80){
@@ -27,10 +27,10 @@ public class DataProcessing {
 		return level;
 	}
 
-	//通过用户的输入推断出成绩百分比
+	//Calculate the grade percentage from the user's input
 	public static double CurrentGrade(int[] quizPercentarray, int[] testPercentarray, int[] assignmentPercentarray,
 			int quizPercent, int testPercent, int assignmentPercent, int finalExamPercent, int finalExamScore) {
-		// 动态统计实际输入的成绩个数（成绩范围 1-100，未输入的位置是 0）
+		// Dynamically count the entered grades (grades are 1-100; empty slots are 0)
 		int quizCount = 0;
 		int quizSum = 0;
 		for (int j : quizPercentarray) {
@@ -75,7 +75,7 @@ public class DataProcessing {
 			totalWeight += assignmentPercent;
 		}
 
-		// 期末：只有输入了期末分数(>0)才计入
+		// Final exam: only counted when a score (>0) has been entered
 		if (finalExamScore > 0) {
 			weightedSum += finalExamScore * finalExamPercent;
 			totalWeight += finalExamPercent;
@@ -84,7 +84,7 @@ public class DataProcessing {
 		return totalWeight == 0 ? 0 : weightedSum / totalWeight;
 	}
 
-	//向用户展示所有的成绩
+	//Show all grades to the user
 	public static void ShowGrades(int[] quizPercentarray, int[] testPercentarray, int[] assignmentPercentarray,int finalExamScore) {
 		println("Score menu");
 		println("your final exam mark is:" + finalExamScore);
@@ -96,38 +96,60 @@ public class DataProcessing {
 
 		switch (option) {
 			case 1:
+				int quizCount = 0;
 				for (int i = 0; i < quizPercentarray.length; i++) {
-					if (quizPercentarray[i] <= 0) {
-						println("there is no grade for quiz");
-					}else{
-						println("quiz" + i+1 +":" + quizPercentarray[i]);
+					if (quizPercentarray[i] != 0) {
+						quizCount++;
 					}
-				}//end for
+				}
+				if (quizCount == 0) {
+					println("there is no grade for quiz");
+				}else{
+					for (int i = 0; i < quizPercentarray.length; i++) {
+						if (quizPercentarray[i] != 0) {
+							println("quiz " + (i + 1) + " : " + quizPercentarray[i]);
+						}
+					}
+				}
 				break;
 			case 2:
+				int testCount = 0;
 				for (int i = 0; i < testPercentarray.length; i++) {
-					if (testPercentarray[i] <= 0) {
-						println("there is no grade for test");
-					}else{
-						println("test" + i+1 +":" + testPercentarray[i]);
+					if (testPercentarray[i] != 0) {
+						testCount++;
+					}
+				}
+				if (testCount == 0) {
+					println("there is no grade for test");
+				}else{
+					for (int i = 0; i < testPercentarray.length; i++) {
+						if (testPercentarray[i] != 0) {
+							println("test " + (i + 1) + " : " + testPercentarray[i]);
+						}
 					}
 				}
 				break;
 			case 3:
+				int assignmentCount = 0;
 				for (int i = 0; i < assignmentPercentarray.length; i++) {
-					if (assignmentPercentarray[i] <= 0) {
-						println("there is no grade for assignment");
-					}else{
-						println("assignment" + i+1 +":" + assignmentPercentarray[i]);
+					if (assignmentPercentarray[i] != 0) {
+						assignmentCount++;
+					}
+				}
+				if (assignmentCount == 0) {
+					println("there is no grade for assignment");
+				}else{
+					for (int i = 0; i < assignmentPercentarray.length; i++) {
+						if (assignmentPercentarray[i] != 0) {
+							println("assignment " + (i + 1) + " : " + assignmentPercentarray[i]);
+						}
 					}
 				}
 				break;
 		}
-
-
 	}
 
-	//向用户展示所有成绩从低到高（不影响原数组）
+	//Show all grades sorted from lowest to highest (without changing the original arrays)
 	public static void SortGrades(int[] quizPercentarray, int[] testPercentarray, int[] assignmentPercentarray){
 		sortAndShow("quiz", quizPercentarray);
 		sortAndShow("test", testPercentarray);
@@ -165,6 +187,95 @@ public class DataProcessing {
 		println("your " + name + " grade sorted from lowest to highest:");
 		for (int grade : grades) {
 			println(grade);
+		}
+	}
+
+	//Search for a specific grade
+	public static void DataSearch(int[] quizPercentarray, int[] testPercentarray, int[] assignmentPercentarray){
+		println("1.search quiz grade");
+		println("2.search test grade");
+		println("3.search assignment grade");
+		println("4.search by level");
+
+		int option = sc.nextInt();
+
+		switch (option) {
+			case 1:
+				println("which quiz grade do you want to search?");
+				int quizTarget = sc.nextInt();
+				int quizCount = 0;
+				for (int i = 0; i < quizPercentarray.length; i++) {
+					if (quizPercentarray[i] != 0 && quizPercentarray[i] == quizTarget) {
+						println("quiz " + (i + 1) + " : " + quizPercentarray[i]);
+						quizCount++;
+					}
+				}
+				if (quizCount == 0) {
+					println("there is no quiz grade " + quizTarget);
+				}else{
+					println("found " + quizCount + " quiz grade");
+				}
+				break;
+			case 2:
+				println("which test grade do you want to search?");
+				int testTarget = sc.nextInt();
+				int testCount = 0;
+				for (int i = 0; i < testPercentarray.length; i++) {
+					if (testPercentarray[i] != 0 && testPercentarray[i] == testTarget) {
+						println("test " + (i + 1) + " : " + testPercentarray[i]);
+						testCount++;
+					}
+				}
+				if (testCount == 0) {
+					println("there is no test grade " + testTarget);
+				}else{
+					println("found " + testCount + " test grade");
+				}
+				break;
+			case 3:
+				println("which assignment grade do you want to search?");
+				int assignmentTarget = sc.nextInt();
+				int assignmentCount = 0;
+				for (int i = 0; i < assignmentPercentarray.length; i++) {
+					if (assignmentPercentarray[i] != 0 && assignmentPercentarray[i] == assignmentTarget) {
+						println("assignment " + (i + 1) + " : " + assignmentPercentarray[i]);
+						assignmentCount++;
+					}
+				}
+				if (assignmentCount == 0) {
+					println("there is no assignment grade " + assignmentTarget);
+				}else{
+					println("found " + assignmentCount + " assignment grade");
+				}
+				break;
+			case 4:
+				println("which level do you want to search? (4/3/2/1/R)");
+				String levelTarget = sc.next();
+				int levelCount = 0;
+				for (int i = 0; i < quizPercentarray.length; i++) {
+					if (quizPercentarray[i] != 0 && level(quizPercentarray[i]).equals(levelTarget)) {
+						println("quiz " + (i + 1) + " : " + quizPercentarray[i]);
+						levelCount++;
+					}
+				}
+				for (int i = 0; i < testPercentarray.length; i++) {
+					if (testPercentarray[i] != 0 && level(testPercentarray[i]).equals(levelTarget)) {
+						println("test " + (i + 1) + " : " + testPercentarray[i]);
+						levelCount++;
+					}
+				}
+				for (int i = 0; i < assignmentPercentarray.length; i++) {
+					if (assignmentPercentarray[i] != 0 && level(assignmentPercentarray[i]).equals(levelTarget)) {
+						println("assignment " + (i + 1) + " : " + assignmentPercentarray[i]);
+						levelCount++;
+					}
+				}
+				if (levelCount == 0) {
+					println("there is no grade in level " + levelTarget);
+				}else{
+					println("found " + levelCount + " grade in level " + levelTarget);
+				}
+				break;
 		}
 	}
 }
