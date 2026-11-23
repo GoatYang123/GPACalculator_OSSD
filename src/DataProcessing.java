@@ -278,4 +278,77 @@ public class DataProcessing {
 				break;
 		}
 	}
+
+	//how to get target mark
+	public static double[] NeedToReachTarget(int[] quizPercentarray, int[] testPercentarray, int[] assignmentPercentarray,
+			int quizPercent, int testPercent, int assignmentPercent,
+			int finalExamPercent, int finalExamScore, int targetPercent) {
+		double quizNeed = needOnNext(quizPercentarray, quizPercent,
+				testPercentarray, testPercent, assignmentPercentarray, assignmentPercent,
+				finalExamPercent, finalExamScore, targetPercent);
+		double assignmentNeed = needOnNext(assignmentPercentarray, assignmentPercent,
+				quizPercentarray, quizPercent, testPercentarray, testPercent,
+				finalExamPercent, finalExamScore, targetPercent);
+		double testNeed = needOnNext(testPercentarray, testPercent,
+				quizPercentarray, quizPercent, assignmentPercentarray, assignmentPercent,
+				finalExamPercent, finalExamScore, targetPercent);
+		return new double[]{quizNeed, assignmentNeed, testNeed};
+	}
+	private static double needOnNext(int[] targetArray, int targetWeight,
+			int[] otherA, int weightA, int[] otherB, int weightB,
+			int finalExamPercent, int finalExamScore, int targetPercent) {
+		if (targetWeight <= 0) {
+			return Double.NaN;
+		}
+
+		// Weighted sum and total weight of the other two categories (+ final exam if taken)
+		double otherWeightedSum = 0;
+		int otherTotalWeight = 0;
+
+		int countA = 0;
+		int sumA = 0;
+		for (int v : otherA) {
+			if (v != 0) {
+				countA++;
+				sumA += v;
+			}
+		}
+		if (countA > 0) {
+			otherWeightedSum += (double) sumA / countA * weightA;
+			otherTotalWeight += weightA;
+		}
+
+		int countB = 0;
+		int sumB = 0;
+		for (int v : otherB) {
+			if (v != 0) {
+				countB++;
+				sumB += v;
+			}
+		}
+		if (countB > 0) {
+			otherWeightedSum += (double) sumB / countB * weightB;
+			otherTotalWeight += weightB;
+		}
+
+		if (finalExamScore > 0) {
+			otherWeightedSum += finalExamScore * finalExamPercent;
+			otherTotalWeight += finalExamPercent;
+		}
+
+		// target = (otherWeightedSum + newAvg * targetWeight) / (otherTotalWeight + targetWeight)
+		double required = targetPercent * (otherTotalWeight + targetWeight) - otherWeightedSum;
+		double newAvg = required / targetWeight;
+
+		// Add one more grade x so that (sumT + x) / (countT + 1) = newAvg
+		int countT = 0;
+		int sumT = 0;
+		for (int v : targetArray) {
+			if (v != 0) {
+				countT++;
+				sumT += v;
+			}
+		}
+		return newAvg * (countT + 1) - sumT;
+	}
 }

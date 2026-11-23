@@ -55,6 +55,16 @@ void main() throws IOException {
         println(subject + " grade");
         println("your taget:" + tagetPercent + "%");
         println("your current grade:" + CurrentGrade +"%" + " level " + Level);
+        double[] need = DataProcessing.NeedToReachTarget(quizPercentarray, testPercentarray, assignmentPercentarray,
+                quizPercent, testPercent, assignmentPercent,
+                finalExamPercent, finalExamScore, tagetPercent);
+        double quizgradetarget = need[0];
+        double assignmentgradetarget = need[1];
+        double testgradetraget = need[2];
+        System.out.println("to reach your target of " + tagetPercent + "%:");
+        System.out.println("next quiz: " + describeNeed(quizgradetarget));
+        System.out.println("next assignment: " + describeNeed(assignmentgradetarget));
+        System.out.println("next test: " + describeNeed(testgradetraget));
         println("1.Modify your grade");
         println("2.show all the grade");
         println("3.show all the grades from Lowest to highest");
@@ -94,4 +104,17 @@ void main() throws IOException {
             case 7: return;
         }
     }
+}
+
+String describeNeed(double need) {
+    if (Double.isNaN(need)) {
+        return "this category has 0% weight, so it does not affect your grade";
+    }
+    if (need > 100) {
+        return "impossible - you would need " + (Math.round(need * 10) / 10.0) + ", which is above 100";
+    }
+    if (need <= 0) {
+        return "target already reached - you can score 0";
+    }
+    return "you need to get " + (Math.round(need * 10) / 10.0) + " or higher";
 }
