@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grade Tracker</title>
+<style>
+  :root {
+    --bg: #f3f4fa;
+    --card: #ffffff;
+    --ink: #202432;
+    --muted: #6b7280;
+    --line: #e8e9f2;
+    --accent: #6366f1;
+    --accent-soft: #eef0ff;
+    --good: #10b981;
+    --warn: #d97706;
+    --bad: #ef4444;
+    --radius: 18px;
+    --shadow: 0 12px 34px rgba(28, 32, 55, .09);
+    --shadow-sm: 0 4px 14px rgba(28, 32, 55, .06);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    color: var(--ink);
+    background:
+      radial-gradient(1100px 520px at 8% -12%, #e7ebff 0%, transparent 60%),
+      radial-gradient(900px 460px at 112% -6%, #f4e9ff 0%, transparent 55%),
+      var(--bg);
+    min-height: 100vh;
+    padding: 30px 18px 64px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .app { max-width: 1060px; margin: 0 auto; }
+
+  h1, h2, h3 { margin: 0; font-weight: 700; letter-spacing: -.02em; }
+  .muted { color: var(--muted); }
+  .hidden { display: none !important; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* ---------- buttons ---------- */
+  .btn {
+    appearance: none;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--ink);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform .06s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease;
+    font-family: inherit;
+  }
+  .btn:hover { border-color: #d5d7e6; box-shadow: var(--shadow-sm); }
+  .btn:active { transform: translateY(1px); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { filter: brightness(1.05); }
+  .btn.ghost { background: transparent; }
+  .btn.danger { color: #b42318; border-color: #f3d6d3; background: #fff5f4; }
+  .btn.danger:hover { background: #ffeceb; }
+  .icon-btn {
+    border: none; background: transparent; cursor: pointer;
+    font-size: 16px; color: var(--muted); padding: 6px 8px; border-radius: 8px;
+  }
+  .icon-btn:hover { background: #f1f2f8; color: var(--ink); }
+
+  /* ---------- hero ---------- */
+  .hero { padding: 22px 26px 26px; margin-bottom: 20px; }
+  .hero-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .eyebrow { text-transform: uppercase; letter-spacing: .14em; font-size: 11px; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+  .hero h1 { font-size: 26px; }
+  .hero-body { display: flex; align-items: center; gap: 30px; margin-top: 20px; flex-wrap: wrap; }
+
+  .ring {
+    --p: 0;
+    width: 152px; height: 152px; border-radius: 50%;
+    background: conic-gradient(var(--accent) calc(var(--p) * 1%), #e8e9f2 0);
+    display: grid; place-items: center;
+    flex: 0 0 auto;
+    transition: background .35s ease;
+  }
+  .ring-inner {
+    width: 120px; height: 120px; border-radius: 50%;
+    background: var(--card);
+    display: grid; place-items: center;
+    box-shadow: inset 0 2px 8px rgba(20, 24, 45, .05);
+  }
+  .ring-val { font-size: 36px; font-weight: 800; letter-spacing: -.03em; line-height: 1; }
+  .ring-pct { font-size: 20px; font-weight: 700; color: var(--muted); margin-left: 1px; }
+  .ring-label { font-size: 10px; text-transform: uppercase; letter-spacing: .16em; color: var(--muted); margin-top: 6px; }
+
+  .hero-meta { display: flex; flex-direction: column; gap: 12px; min-width: 220px; }
+  .level-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    align-self: flex-start;
+    font-size: 15px; font-weight: 800;
+    padding: 8px 18px; border-radius: 999px;
+    background: #f1f2f8; color: var(--ink);
+  }
+  .level-chip[data-lv="4"] { background: #e6f8f0; color: #0d9b6c; }
+  .level-chip[data-lv="3"] { background: #e8f0ff; color: #2f6fed; }
+  .level-chip[data-lv="2"] { background: #fff5e6; color: #c07b0a; }
+  .level-chip[data-lv="1"] { background: #ffefe6; color: #d05a12; }
+  .level-chip[data-lv="R"] { background: #ffe9e8; color: #d3352b; }
+  .meta-row { display: flex; justify-content: space-between; gap: 20px; font-size: 14px; border-bottom: 1px dashed var(--line); padding-bottom: 8px; }
+  .meta-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .meta-k { color: var(--muted); }
+  .meta-v { font-weight: 700; }
+
+  /* ---------- setup ---------- */
+  .setup { padding: 22px 26px; margin-bottom: 20px; }
+  .setup-head h2 { font-size: 18px; margin-bottom: 4px; }
+  .setup-head p { margin: 0 0 18px; font-size: 13.5px; }
+  .setup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; }
+  .field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: #3b4152; }
+  .field .hint { font-weight: 500; color: var(--muted); font-size: 11.5px; }
+  .field input {
+    font: inherit; font-weight: 500; color: var(--ink);
+    padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px;
+    background: #fbfbfe; outline: none; transition: border-color .15s, box-shadow .15s;
+  }
+  .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); background: #fff; }
+  .setup-foot { display: flex; align-items: center; justify-content: flex-end; gap: 14px; margin-top: 18px; }
+  .warn { color: var(--warn); font-size: 13px; font-weight: 600; margin-right: auto; }
+
+  /* ---------- category cards ---------- */
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 18px; margin-bottom: 20px; }
+  .category { padding: 18px 18px 16px; display: flex; flex-direction: column; min-height: 240px; }
+  .cat-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
+  .cat-title { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+  .cat-weight { font-size: 12px; font-weight: 700; color: var(--accent); background: var(--accent-soft); padding: 3px 9px; border-radius: 999px; }
+  .cat-avg { font-size: 12px; color: var(--muted); font-weight: 600; }
+
+  .grade-list { display: flex; flex-direction: column; gap: 8px; flex: 1; max-height: 320px; overflow-y: auto; padding-right: 2px; }
+  .grade-row {
+    display: flex; align-items: center; gap: 8px;
+    background: #f8f9fd; border: 1px solid #eef0f7;
+    border-radius: 11px; padding: 6px 8px 6px 10px;
+  }
+  .g-idx { font-size: 11px; font-weight: 700; color: var(--muted); width: 18px; flex: 0 0 auto; }
+  .g-val {
+    width: 62px; font: inherit; font-weight: 700; font-size: 14px; color: var(--ink);
+    border: 1px solid transparent; background: transparent; border-radius: 8px;
+    padding: 4px 6px; outline: none;
+  }
+  .g-val:hover { border-color: var(--line); background: #fff; }
+  .g-val:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 2px var(--accent-soft); }
+  .g-level {
+    margin-left: auto; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 999px;
+    background: #eef0f7; color: var(--muted);
+  }
+  .g-level[data-lv="4"] { background: #e6f8f0; color: #0d9b6c; }
+  .g-level[data-lv="3"] { background: #e8f0ff; color: #2f6fed; }
+  .g-level[data-lv="2"] { background: #fff5e6; color: #c07b0a; }
+  .g-level[data-lv="1"] { background: #ffefe6; color: #d05a12; }
+  .g-level[data-lv="R"] { background: #ffe9e8; color: #d3352b; }
+  .g-del { border: none; background: transparent; color: #b6b9c9; cursor: pointer; font-size: 14px; padding: 4px 6px; border-radius: 7px; }
+  .g-del:hover { background: #ffeceb; color: var(--bad); }
+  .empty { color: var(--muted); font-size: 13px; text-align: center; padding: 26px 8px; font-weight: 500; }
+
+  .add-row { display: flex; gap: 8px; margin-top: 14px; }
+  .add-input {
+    flex: 1; font: inherit; padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px;
+    background: #fbfbfe; outline: none; min-width: 0;
+  }
+  .add-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); background: #fff; }
+
+  /* ---------- actions ---------- */
+  .actions { padding: 16px 18px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+  .action-group { display: flex; flex-wrap: wrap; gap: 8px; }
+  .foot { text-align: center; font-size: 12.5px; }
+  .foot a { color: var(--accent); text-decoration: none; font-weight: 600; }
+  .foot a:hover { text-decoration: underline; }
+
+  /* ---------- modal ---------- */
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(20, 24, 45, .42);
+    display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 50;
+    backdrop-filter: blur(3px);
+  }
+  .modal {
+    background: var(--card); border-radius: 20px; box-shadow: 0 30px 70px rgba(20,24,45,.3);
+    width: min(560px, 100%); max-height: 84vh; overflow: hidden; display: flex; flex-direction: column;
+    animation: pop .18s ease;
+  }
+  @keyframes pop { from { transform: translateY(10px) scale(.98); opacity: 0; } to { transform: none; opacity: 1; } }
+  .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid var(--line); }
+  .modal-head h2 { font-size: 17px; }
+  .modal-body { padding: 20px 22px; overflow-y: auto; }
+
+  .field-row { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 14px; }
+  .field-row label { display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; font-weight: 600; color: #3b4152; flex: 1; min-width: 120px; }
+  .field-row select, .field-row input {
+    font: inherit; font-weight: 500; padding: 9px 11px; border: 1px solid var(--line); border-radius: 10px;
+    background: #fbfbfe; outline: none;
+  }
+  .field-row select:focus, .field-row input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); background: #fff; }
+
+  .results { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+  .result-head { font-size: 13px; font-weight: 700; color: var(--muted); margin-bottom: 2px; }
+  .result-row { background: #f8f9fd; border: 1px solid #eef0f7; border-radius: 10px; padding: 9px 12px; font-size: 14px; font-weight: 600; }
+
+  .summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 18px; }
+  .summary-box { background: #f8f9fd; border: 1px solid #eef0f7; border-radius: 12px; padding: 12px 14px; }
+  .summary-box .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700; }
+  .summary-box .val { font-size: 20px; font-weight: 800; margin-top: 3px; }
+  .summary-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  .summary-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); padding: 8px 8px; border-bottom: 1px solid var(--line); }
+  .summary-table td { padding: 9px 8px; border-bottom: 1px solid #f2f3f8; font-weight: 600; }
+  .summary-table tr.muted td { color: var(--muted); font-weight: 500; }
+
+  /* ---------- toast ---------- */
+  .toast {
+    position: fixed; left: 50%; bottom: 26px; transform: translate(-50%, 20px);
+    background: #1f2433; color: #fff; padding: 11px 20px; border-radius: 12px; font-size: 13.5px; font-weight: 600;
+    opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 80; box-shadow: 0 14px 34px rgba(0,0,0,.3);
+    max-width: 90vw;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="card hero">
+    <div class="hero-head">
+      <div>
+        <div class="eyebrow">Grade tracker</div>
+        <h1 id="subjectTitle">Grade Tracker</h1>
+      </div>
+      <button class="btn ghost" id="toggleSetup">&#9881; Settings</button>
+    </div>
+    <div class="hero-body">
+      <div class="ring" id="gradeRing" style="--p:0">
+        <div class="ring-inner">
+          <div class="ring-val"><span id="currentGrade">0</span><span class="ring-pct">%</span></div>
+          <div class="ring-label">current</div>
+        </div>
+      </div>
+      <div class="hero-meta">
+        <div class="level-chip" id="levelBadge" data-lv="R">Level R</div>
+        <div class="meta-row"><span class="meta-k">Target</span><span class="meta-v" id="targetValue">85%</span></div>
+        <div class="meta-row"><span class="meta-k">Weight counted</span><span class="meta-v" id="weightInfo">0%</span></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="setupPanel" class="card setup hidden">
+    <div class="setup-head">
+      <h2>Course setup</h2>
+      <p class="muted">Set each category's weight, your final exam and your target. Weights must add up to at most 100%.</p>
+    </div>
+    <div class="setup-grid">
+      <label class="field">Subject
+        <input id="fSubject" type="text" placeholder="e.g. Math">
+      </label>
+      <label class="field">Quiz %
+        <input id="fQuiz" type="number" min="0" max="100" value="20">
+      </label>
+      <label class="field">Assignment %
+        <input id="fAssignment" type="number" min="0" max="100" value="30">
+      </label>
+      <label class="field">Test %
+        <input id="fTest" type="number" min="0" max="100" value="20">
+      </label>
+      <label class="field">Final exam %
+        <input id="fFinalPercent" type="number" min="0" max="100" value="30">
+      </label>
+      <label class="field">Final exam score <span class="hint">(0 = not taken)</span>
+        <input id="fFinalScore" type="number" min="0" max="100" value="0">
+      </label>
+      <label class="field">Target %
+        <input id="fTarget" type="number" min="0" max="100" value="85">
+      </label>
+    </div>
+    <div class="setup-foot">
+      <span id="setupWarn" class="warn"></span>
+      <button class="btn primary" id="saveSetup">Save setup</button>
+    </div>
+  </section>
+
+  <section class="grid">
+    <article class="card category" data-cat="quiz">
+      <div class="cat-head">
+        <div class="cat-title">Quiz <span class="cat-weight">20%</span></div>
+        <div class="cat-avg">no grades yet</div>
+      </div>
+      <div class="grade-list"></div>
+      <div class="add-row">
+        <input class="add-input" type="number" min="1" max="100" placeholder="1-100">
+        <button class="btn primary add-btn">Add</button>
+      </div>
+    </article>
+
+    <article class="card category" data-cat="test">
+      <div class="cat-head">
+        <div class="cat-title">Test <span class="cat-weight">20%</span></div>
+        <div class="cat-avg">no grades yet</div>
+      </div>
+      <div class="grade-list"></div>
+      <div class="add-row">
+        <input class="add-input" type="number" min="1" max="100" placeholder="1-100">
+        <button class="btn primary add-btn">Add</button>
+      </div>
+    </article>
+
+    <article class="card category" data-cat="assignment">
+      <div class="cat-head">
+        <div class="cat-title">Assignment <span class="cat-weight">30%</span></div>
+        <div class="cat-avg">no grades yet</div>
+      </div>
+      <div class="grade-list"></div>
+      <div class="add-row">
+        <input class="add-input" type="number" min="1" max="100" placeholder="1-100">
+        <button class="btn primary add-btn">Add</button>
+      </div>
+    </article>
+  </section>
+
+  <section class="card actions">
+    <div class="action-group">
+      <button class="btn" id="sortBtn">Sort grades</button>
+      <button class="btn" id="summaryBtn">Summary</button>
+      <button class="btn" id="searchBtn">Search</button>
+    </div>
+    <div class="action-group">
+      <button class="btn" id="exportBtn">Export</button>
+      <button class="btn" id="importBtn">Import</button>
+      <button class="btn" id="reloadBtn">Reload</button>
+      <button class="btn danger" id="deleteAllBtn">Delete all</button>
+    </div>
+    <input type="file" id="importFile" accept="application/json,.json" hidden>
+  </section>
+
+  <footer class="foot muted">Saved automatically in your browser &middot; <a href="#" id="resetLink">Reset everything</a></footer>
+</div>
+
+<div class="modal-backdrop hidden" id="modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="modalTitle">Title</h2>
+      <button class="icon-btn" id="modalClose">&#10005;</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var CATS = ["quiz", "test", "assignment"];
+  var CAT_LABEL = { quiz: "Quiz", test: "Test", assignment: "Assignment" };
+  var STORAGE_KEY = "gradeTracker.v1";
+  var state = loadState();
+  var toastTimer = null;
+
+  /* ---------------- state ---------------- */
+  function defaultState() {
+    return {
+      subject: "Grade Tracker",
+      quizPercent: 20,
+      assignmentPercent: 30,
+      testPercent: 20,
+      finalExamPercent: 30,
+      finalExamScore: 0,
+      targetPercent: 85,
+      grades: { quiz: [], test: [], assignment: [] },
+      configured: false
+    };
+  }
+
+  function clampInt(v, lo, hi, fallback) {
+    var n = parseInt(v, 10);
+    if (isNaN(n)) return fallback;
+    if (n < lo) return lo;
+    if (n > hi) return hi;
+    return n;
+  }
+
+  function loadState() {
+    var base = defaultState();
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        var p = JSON.parse(raw) || {};
+        var grades = p.grades || {};
+        base.subject = typeof p.subject === "string" && p.subject.trim() ? p.subject : "Grade Tracker";
+        base.quizPercent = clampInt(p.quizPercent, 0, 100, 20);
+        base.assignmentPercent = clampInt(p.assignmentPercent, 0, 100, 30);
+        base.testPercent = clampInt(p.testPercent, 0, 100, 20);
+        base.finalExamPercent = clampInt(p.finalExamPercent, 0, 100, 30);
+        base.finalExamScore = clampInt(p.finalExamScore, 0, 100, 0);
+        base.targetPercent = clampInt(p.targetPercent, 0, 100, 85);
+        base.grades = {
+          quiz: sanitizeList(grades.quiz),
+          test: sanitizeList(grades.test),
+          assignment: sanitizeList(grades.assignment)
+        };
+        base.configured = !!p.configured;
+      }
+    } catch (e) { /* ignore corrupt storage */ }
+    return base;
+  }
+
+  function sanitizeList(list) {
+    if (!Array.isArray(list)) return [];
+    var out = [];
+    for (var i = 0; i < list.length && out.length < 1000; i++) {
+      var n = parseInt(list[i], 10);
+      if (!isNaN(n) && n >= 1 && n <= 100) out.push(n);
+    }
+    return out;
+  }
+
+  function saveState() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* storage may be blocked */ }
+  }
+
+  /* ---------------- math ---------------- */
+  function sum(arr) {
+    var s = 0;
+    for (var i = 0; i < arr.length; i++) s += arr[i];
+    return s;
+  }
+
+  function level(grade) {
+    if (grade >= 80) return "4";
+    if (grade >= 70) return "3";
+    if (grade >= 60) return "2";
+    if (grade >= 50) return "1";
+    return "R";
+  }
+
+  function compute() {
+    var weights = { quiz: state.quizPercent, test: state.testPercent, assignment: state.assignmentPercent };
+    var res = { quiz: null, test: null, assignment: null, final: null };
+    var weightedSum = 0;
+    var totalWeight = 0;
+
+    for (var c = 0; c < CATS.length; c++) {
+      var cat = CATS[c];
+      var list = state.grades[cat];
+      if (list.length > 0) {
+        var avg = sum(list) / list.length;
+        res[cat] = { count: list.length, avg: avg, weight: weights[cat], contribution: avg * weights[cat] / 100 };
+        weightedSum += avg * weights[cat];
+        totalWeight += weights[cat];
+      }
+    }
+
+    if (state.finalExamScore > 0) {
+      res.final = {
+        score: state.finalExamScore,
+        weight: state.finalExamPercent,
+        contribution: state.finalExamScore * state.finalExamPercent / 100
+      };
+      weightedSum += state.finalExamScore * state.finalExamPercent;
+      totalWeight += state.finalExamPercent;
+    }
+
+    var current = totalWeight === 0 ? 0 : weightedSum / totalWeight;
+    return { current: current, level: level(current), totalWeight: totalWeight, weightedSum: weightedSum, res: res };
+  }
+
+  /* ---------------- rendering ---------------- */
+  function render() {
+    var info = compute();
+
+    document.getElementById("subjectTitle").textContent = state.subject || "Grade Tracker";
+    document.getElementById("currentGrade").textContent = info.current.toFixed(1);
+    document.getElementById("gradeRing").style.setProperty("--p", Math.max(0, Math.min(100, info.current)));
+
+    var badge = document.getElementById("levelBadge");
+    badge.textContent = "Level " + info.level;
+    badge.setAttribute("data-lv", info.level);
+
+    document.getElementById("targetValue").textContent = state.targetPercent + "%";
+    document.getElementById("weightInfo").textContent = info.totalWeight + "%";
+
+    for (var c = 0; c < CATS.length; c++) {
+      renderCard(CATS[c], info.res[CATS[c]]);
+    }
+  }
+
+  function renderCard(cat, info) {
+    var card = document.querySelector('[data-cat="' + cat + '"]');
+    if (!card) return;
+    var weight = state[cat + "Percent"];
+
+    card.querySelector(".cat-weight").textContent = weight + "%";
+    var avgEl = card.querySelector(".cat-avg");
+    if (info) {
+      avgEl.textContent = "avg " + info.avg.toFixed(1) + " \u00b7 " + info.count + (info.count > 1 ? " grades" : " grade");
+    } else {
+      avgEl.textContent = "no grades yet";
+    }
+
+    var listEl = card.querySelector(".grade-list");
+    listEl.innerHTML = "";
+    var list = state.grades[cat];
+
+    if (list.length === 0) {
+      var empty = document.createElement("div");
+      empty.className = "empty";
+      empty.textContent = "No " + CAT_LABEL[cat].toLowerCase() + " grades yet. Add one below.";
+      listEl.appendChild(empty);
+      return;
+    }
+
+    for (var i = 0; i < list.length; i++) {
+      listEl.appendChild(buildGradeRow(cat, i, list[i]));
+    }
+  }
+
+  function buildGradeRow(cat, idx, value) {
+    var row = document.createElement("div");
+    row.className = "grade-row";
+
+    var idxEl = document.createElement("span");
+    idxEl.className = "g-idx";
+    idxEl.textContent = String(idx + 1);
+
+    var input = document.createElement("input");
+    input.className = "g-val";
+    input.type = "number";
+    input.min = "1";
+    input.max = "100";
+    input.value = String(value);
+    input.addEventListener("change", function () {
+      var v = parseInt(input.value, 10);
+      if (isNaN(v) || v < 1 || v > 100) {
+        toast("Grade must be between 1 and 100");
+        input.value = String(value);
+        return;
+      }
+      state.grades[cat][idx] = v;
+      saveState();
+      render();
+    });
+
+    var lvl = document.createElement("span");
+    lvl.className = "g-level";
+    lvl.setAttribute("data-lv", level(value));
+    lvl.textContent = level(value);
+
+    var del = document.createElement("button");
+    del.className = "g-del";
+    del.title = "Delete this grade";
+    del.textContent = "\u2715";
+    del.addEventListener("click", function () {
+      var removed = state.grades[cat].splice(idx, 1);
+      saveState();
+      render();
+      toast("Deleted " + CAT_LABEL[cat] + " " + (idx + 1) + " (" + removed[0] + ")");
+    });
+
+    row.appendChild(idxEl);
+    row.appendChild(input);
+    row.appendChild(lvl);
+    row.appendChild(del);
+    return row;
+  }
+
+  /* ---------------- grade actions ---------------- */
+  function addGrade(cat, input) {
+    var v = parseInt(input.value, 10);
+    if (isNaN(v)) { toast("Enter a number first"); return; }
+    if (v < 1 || v > 100) { toast("Grade must be between 1 and 100"); return; }
+    if (state.grades[cat].length >= 1000) { toast("Maximum 1000 grades per category"); return; }
+    state.grades[cat].push(v);
+    input.value = "";
+    saveState();
+    render();
+    input.focus();
+  }
+
+  function sortAll() {
+    var changed = 0;
+    for (var c = 0; c < CATS.length; c++) {
+      var cat = CATS[c];
+      var list = state.grades[cat];
+      if (list.length > 1) {
+        list.sort(function (a, b) { return a - b; });
+        changed++;
+      }
+    }
+    saveState();
+    render();
+    toast(changed ? "Grades sorted from lowest to highest" : "Not enough grades to sort");
+  }
+
+  function deleteAll() {
+    var hasAny = CATS.some(function (c) { return state.grades[c].length > 0; });
+    if (!hasAny) { toast("There are no grades to delete"); return; }
+    if (!confirm("Delete ALL grades (quiz, test and assignment)?")) return;
+    state.grades = { quiz: [], test: [], assignment: [] };
+    saveState();
+    render();
+    toast("All grades deleted");
+  }
+
+  function reload() {
+    state = loadState();
+    fillSetup();
+    render();
+    toast("Reloaded saved data");
+  }
+
+  function resetAll() {
+    if (!confirm("Reset everything? This clears setup and all grades.")) return;
+    state = defaultState();
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }
+    fillSetup();
+    render();
+    showSetup(true);
+    toast("Everything reset");
+  }
+
+  /* ---------------- setup ---------------- */
+  function fillSetup() {
+    document.getElementById("fSubject").value = state.subject || "";
+    document.getElementById("fQuiz").value = state.quizPercent;
+    document.getElementById("fAssignment").value = state.assignmentPercent;
+    document.getElementById("fTest").value = state.testPercent;
+    document.getElementById("fFinalPercent").value = state.finalExamPercent;
+    document.getElementById("fFinalScore").value = state.finalExamScore;
+    document.getElementById("fTarget").value = state.targetPercent;
+    document.getElementById("setupWarn").textContent = "";
+  }
+
+  function showSetup(show) {
+    document.getElementById("setupPanel").classList.toggle("hidden", !show);
+  }
+
+  function warn(msg) {
+    document.getElementById("setupWarn").textContent = msg;
+  }
+
+  function saveSetup() {
+    var subject = document.getElementById("fSubject").value.trim() || "Grade Tracker";
+    var q = parseInt(document.getElementById("fQuiz").value, 10);
+    var a = parseInt(document.getElementById("fAssignment").value, 10);
+    var t = parseInt(document.getElementById("fTest").value, 10);
+    var fp = parseInt(document.getElementById("fFinalPercent").value, 10);
+    var fs = parseInt(document.getElementById("fFinalScore").value, 10);
+    var tg = parseInt(document.getElementById("fTarget").value, 10);
+
+    if ([q, a, t, fp, fs, tg].some(function (v) { return isNaN(v); })) {
+      warn("Please fill every field with a number.");
+      return;
+    }
+    if ([q, a, t, fp].some(function (v) { return v < 0 || v > 100; })) {
+      warn("Category percentages must be between 0 and 100.");
+      return;
+    }
+    if (fs < 0 || fs > 100) { warn("Final exam score must be 0-100 (0 = not taken)."); return; }
+    if (tg < 0 || tg > 100) { warn("Target must be between 0 and 100."); return; }
+
+    var total = q + a + t + fp;
+    if (total > 100) {
+      warn("Total weight is " + total + "% \u2014 it must be at most 100%.");
+      return;
+    }
+
+    state.subject = subject;
+    state.quizPercent = q;
+    state.assignmentPercent = a;
+    state.testPercent = t;
+    state.finalExamPercent = fp;
+    state.finalExamScore = fs;
+    state.targetPercent = tg;
+    state.configured = true;
+
+    saveState();
+    render();
+    showSetup(false);
+    toast("Setup saved");
+  }
+
+  /* ---------------- summary ---------------- */
+  function openSummary() {
+    var info = compute();
+    var rows = "";
+
+    for (var c = 0; c < CATS.length; c++) {
+      var cat = CATS[c];
+      var item = info.res[cat];
+      var w = state[cat + "Percent"];
+      if (item) {
+        rows += "<tr><td>" + CAT_LABEL[cat] + "</td><td>" + item.count + "</td><td>" +
+          item.avg.toFixed(1) + "</td><td>" + w + "%</td><td>" + item.contribution.toFixed(2) + "</td></tr>";
+      } else {
+        rows += "<tr class=\"muted\"><td>" + CAT_LABEL[cat] + "</td><td>0</td><td>\u2014</td><td>" +
+          w + "%</td><td>\u2014</td></tr>";
+      }
+    }
+
+    if (info.res.final) {
+      rows += "<tr><td>Final exam</td><td>1</td><td>" + info.res.final.score + "</td><td>" +
+        state.finalExamPercent + "%</td><td>" + info.res.final.contribution.toFixed(2) + "</td></tr>";
+    } else {
+      rows += "<tr class=\"muted\"><td>Final exam</td><td>0</td><td>\u2014</td><td>" +
+        state.finalExamPercent + "%</td><td>\u2014</td></tr>";
+    }
+
+    var html =
+      '<div class="summary-grid">' +
+        '<div class="summary-box"><div class="lbl">Current grade</div><div class="val">' + info.current.toFixed(1) + '%</div></div>' +
+        '<div class="summary-box"><div class="lbl">Level</div><div class="val">' + info.level + '</div></div>' +
+        '<div class="summary-box"><div class="lbl">Target</div><div class="val">' + state.targetPercent + '%</div></div>' +
+        '<div class="summary-box"><div class="lbl">Weight counted</div><div class="val">' + info.totalWeight + '%</div></div>' +
+      '</div>' +
+      '<table class="summary-table"><thead><tr><th>Category</th><th>Count</th><th>Average</th><th>Weight</th><th>Points</th></tr></thead><tbody>' +
+      rows +
+      '</tbody></table>';
+
+    openModal("Summary", html);
+  }
+
+  /* ---------------- search ---------------- */
+  function openSearch() {
+    var html =
+      '<div class="field-row">' +
+        '<label>Search by<select id="sMode"><option value="grade">Grade value</option><option value="level">Level</option></select></label>' +
+      '</div>' +
+      '<div class="field-row" id="sGradeBox">' +
+        '<label>Category<select id="sCat"><option value="quiz">Quiz</option><option value="test">Test</option><option value="assignment">Assignment</option></select></label>' +
+        '<label>Grade value<input id="sVal" type="number" min="1" max="100" placeholder="1-100"></label>' +
+      '</div>' +
+      '<div class="field-row hidden" id="sLevelBox">' +
+        '<label>Level<select id="sLevel"><option value="4">4</option><option value="3">3</option><option value="2">2</option><option value="1">1</option><option value="R">R</option></select></label>' +
+      '</div>' +
+      '<button class="btn primary" id="sGo">Search</button>' +
+      '<div class="results" id="sResults"></div>';
+
+    openModal("Search grades", html);
+
+    var mode = document.getElementById("sMode");
+    mode.addEventListener("change", function () {
+      var isGrade = mode.value === "grade";
+      document.getElementById("sGradeBox").classList.toggle("hidden", !isGrade);
+      document.getElementById("sLevelBox").classList.toggle("hidden", isGrade);
+      document.getElementById("sResults").innerHTML = "";
+    });
+
+    document.getElementById("sGo").addEventListener("click", function () {
+      var resultsEl = document.getElementById("sResults");
+      var out = "";
+
+      if (mode.value === "grade") {
+        var cat = document.getElementById("sCat").value;
+        var v = parseInt(document.getElementById("sVal").value, 10);
+        if (isNaN(v) || v < 1 || v > 100) { toast("Grade must be between 1 and 100"); return; }
+        var hits = [];
+        for (var i = 0; i < state.grades[cat].length; i++) {
+          if (state.grades[cat][i] === v) hits.push({ index: i, value: v });
+        }
+        if (hits.length === 0) {
+          out = '<div class="empty">No ' + CAT_LABEL[cat] + ' grade of ' + v + '.</div>';
+        } else {
+          out = '<div class="result-head">Found ' + hits.length + ' ' + CAT_LABEL[cat] + ' grade(s) of ' + v + '</div>' +
+            hits.map(function (h) { return '<div class="result-row">' + CAT_LABEL[cat] + ' ' + (h.index + 1) + ' : ' + h.value + '</div>'; }).join("");
+        }
+      } else {
+        var lv = document.getElementById("sLevel").value;
+        var found = [];
+        for (var c = 0; c < CATS.length; c++) {
+          var cc = CATS[c];
+          for (var j = 0; j < state.grades[cc].length; j++) {
+            if (level(state.grades[cc][j]) === lv) found.push({ cat: cc, index: j, value: state.grades[cc][j] });
+          }
+        }
+        if (found.length === 0) {
+          out = '<div class="empty">No grade in level ' + lv + '.</div>';
+        } else {
+          out = '<div class="result-head">Found ' + found.length + ' grade(s) in level ' + lv + '</div>' +
+            found.map(function (f) { return '<div class="result-row">' + CAT_LABEL[f.cat] + ' ' + (f.index + 1) + ' : ' + f.value + '</div>'; }).join("");
+        }
+      }
+      resultsEl.innerHTML = out;
+    });
+  }
+
+  /* ---------------- modal ---------------- */
+  function openModal(title, bodyHtml) {
+    document.getElementById("modalTitle").textContent = title;
+    document.getElementById("modalBody").innerHTML = bodyHtml;
+    document.getElementById("modal").classList.remove("hidden");
+  }
+
+  function closeModal() {
+    document.getElementById("modal").classList.add("hidden");
+  }
+
+  /* ---------------- toast ---------------- */
+  function toast(msg) {
+    var el = document.getElementById("toast");
+    el.textContent = msg;
+    el.classList.add("show");
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.classList.remove("show"); }, 2200);
+  }
+
+  /* ---------------- export / import ---------------- */
+  function exportJSON() {
+    try {
+      var data = JSON.stringify(state, null, 2);
+      var blob = new Blob([data], { type: "application/json" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = (state.subject || "grades").replace(/[^\w\-]+/g, "_") + "_grades.json";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast("Exported grades as JSON");
+    } catch (e) {
+      toast("Export failed: " + e.message);
+    }
+  }
+
+  function importJSON(evt) {
+    var file = evt.target.files && evt.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      try {
+        var data = JSON.parse(reader.result);
+        if (!data || typeof data !== "object") throw new Error("Not a valid file");
+        state = mergeImported(data);
+        saveState();
+        fillSetup();
+        render();
+        showSetup(!state.configured);
+        toast("Imported grades");
+      } catch (e) {
+        toast("Import failed: " + e.message);
+      }
+    };
+    reader.readAsText(file);
+    evt.target.value = "";
+  }
+
+  function mergeImported(data) {
+    var base = defaultState();
+    base.subject = typeof data.subject === "string" && data.subject.trim() ? data.subject : "Grade Tracker";
+    base.quizPercent = clampInt(data.quizPercent, 0, 100, 20);
+    base.assignmentPercent = clampInt(data.assignmentPercent, 0, 100, 30);
+    base.testPercent = clampInt(data.testPercent, 0, 100, 20);
+    base.finalExamPercent = clampInt(data.finalExamPercent, 0, 100, 30);
+    base.finalExamScore = clampInt(data.finalExamScore, 0, 100, 0);
+    base.targetPercent = clampInt(data.targetPercent, 0, 100, 85);
+    var g = data.grades || {};
+    base.grades = { quiz: sanitizeList(g.quiz), test: sanitizeList(g.test), assignment: sanitizeList(g.assignment) };
+    base.configured = true;
+    return base;
+  }
+
+  /* ---------------- init ---------------- */
+  function init() {
+    document.getElementById("toggleSetup").addEventListener("click", function () {
+      document.getElementById("setupPanel").classList.toggle("hidden");
+    });
+    document.getElementById("saveSetup").addEventListener("click", saveSetup);
+
+    var cards = document.querySelectorAll(".category");
+    for (var i = 0; i < cards.length; i++) {
+      (function (card) {
+        var cat = card.getAttribute("data-cat");
+        var input = card.querySelector(".add-input");
+        var btn = card.querySelector(".add-btn");
+        btn.addEventListener("click", function () { addGrade(cat, input); });
+        input.addEventListener("keydown", function (e) { if (e.key === "Enter") addGrade(cat, input); });
+      })(cards[i]);
+    }
+
+    document.getElementById("sortBtn").addEventListener("click", sortAll);
+    document.getElementById("summaryBtn").addEventListener("click", openSummary);
+    document.getElementById("searchBtn").addEventListener("click", openSearch);
+    document.getElementById("deleteAllBtn").addEventListener("click", deleteAll);
+    document.getElementById("exportBtn").addEventListener("click", exportJSON);
+    document.getElementById("importBtn").addEventListener("click", function () {
+      document.getElementById("importFile").click();
+    });
+    document.getElementById("importFile").addEventListener("change", importJSON);
+    document.getElementById("reloadBtn").addEventListener("click", reload);
+    document.getElementById("resetLink").addEventListener("click", function (e) { e.preventDefault(); resetAll(); });
+
+    document.getElementById("modalClose").addEventListener("click", closeModal);
+    document.getElementById("modal").addEventListener("click", function (e) {
+      if (e.target && e.target.id === "modal") closeModal();
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") closeModal();
+    });
+
+    fillSetup();
+    if (!state.configured) showSetup(true);
+    render();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
